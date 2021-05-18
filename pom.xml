@@ -1,0 +1,139 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>es.fmp</groupId>
+	<artifactId>pulsar-issue-10630-test</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+
+		<docker-maven-plugin.version>0.34.1</docker-maven-plugin.version>
+		<hamcrest.version>2.1</hamcrest.version>
+		<junit-jupiter.version>5.5.2</junit-jupiter.version>
+		<maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+		<maven-failsafe-plugin.version>2.22.2</maven-failsafe-plugin.version>
+		<pulsar.version>2.7.1</pulsar.version>
+
+		<ciTz>Europe/Madrid</ciTz>
+		<ciPulsarImage>apachepulsar/pulsar:${pulsar.version}</ciPulsarImage>
+		<ciShowContainerLogs>false</ciShowContainerLogs>
+	</properties>
+
+	<developers>
+		<developer>
+			<id>fmiguelez</id>
+			<name>Fernando Miguélez Palomo</name>
+			<email>fernando.miguelez@gmail.com</email>
+		</developer>
+	</developers>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.pulsar</groupId>
+			<artifactId>pulsar-client</artifactId>
+			<version>${pulsar.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.pulsar</groupId>
+			<artifactId>pulsar-client-admin</artifactId>
+			<version>${pulsar.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>${junit-jupiter.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>${junit-jupiter.version}</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>io.fabric8</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<version>${docker-maven-plugin.version}</version>
+				<configuration>
+					<showLogs>${ciShowContainerLogs}</showLogs>
+				</configuration>
+				<executions>
+					<execution>
+						<id>start-pulsar</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>start</goal>
+						</goals>
+						<configuration>
+							<images>
+								<image>
+									<name>${ciPulsarImage}</name>
+									<alias>standalone</alias>
+									<run>
+										<ports>
+											<port>6650:6650</port>
+											<port>8081:8080</port>
+										</ports>
+										<env>
+											<TZ>${ciTz}</TZ>
+											<BOOKIE_MEM> -Xms512m -Xmx512m -XX:MaxDirectMemorySize=1g</BOOKIE_MEM>
+										</env>
+										<cmd>
+											<arg>/bin/bash</arg>
+											<arg>-c</arg>
+											<arg>bin/apply-config-from-env.py conf/standalone.conf\
+												&amp;&amp; bin/pulsar standalone</arg>
+										</cmd>
+										<wait>
+											<http>
+												<url>http://localhost:8081/admin/v2/clusters</url>
+											</http>
+											<time>300000</time>
+											<!-- Time between SIGTERM and SIGKILL -->
+											<!-- We need to let JVM terminate gracefully -->
+											<!-- so JaCoCo agent can write to disk -->
+											<!-- test coverage results -->
+											<kill>60000</kill>
+										</wait>
+									</run>
+								</image>
+							</images>
+						</configuration>
+					</execution>
+					<execution>
+						<id>stop-pulsar</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>stop</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${maven-surefire-plugin.version}</version>
+			</plugin>
+			<plugin>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>${maven-failsafe-plugin.version}</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>
