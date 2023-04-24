@@ -2,7 +2,7 @@
 
 ## Requirements
 
-This has been tested against Pulsar 2.7.1.
+This has been tested against Pulsar 2.8.4.
 
 Requires Maven and Docker (Docker Desktop will do on Windows or MacOS). 
 
@@ -23,10 +23,13 @@ $ docker-compose -f src/test/resources/docker-compose.yml up -d
 Until issue is solved following test will fail:
 
 ```console 
+[INFO]
 [INFO] Results:
 [INFO]
 [ERROR] Failures:
-[ERROR]   PartitionedTopicSeekIT.testEarliest:57->testSeek:98 expected: <[A1, B1, C1, D1]> but was: <[A1, A0, B0, B1, C0, C1, D0, D1, A1, B1, C1, D1]>
+[ERROR]   PartitionedTopicSeekIT.testSeekTimestampFromEarliest:59->testSeek:123 size ==> expected: <4> but was: <9>
+[ERROR] Errors:
+[ERROR]   PartitionedTopicSeekIT.testSeekMessageIdFromLatest:69->testSeek:111 » PulsarClient
 [INFO]
-[ERROR] Tests run: 2, Failures: 1, Errors: 0, Skipped: 0
+[ERROR] Tests run: 3, Failures: 1, Errors: 1, Skipped: 0
 ```

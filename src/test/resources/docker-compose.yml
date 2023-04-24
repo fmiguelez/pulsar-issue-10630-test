@@ -25,7 +25,7 @@ volumes:
 
 services:
   standalone:
-    image: apachepulsar/pulsar:2.7.1
+    image: apachepulsar/pulsar:2.8.4
     expose:
       - 8080
       - 6650 

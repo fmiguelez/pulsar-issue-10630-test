@@ -16,7 +16,7 @@
 		<junit-jupiter.version>5.5.2</junit-jupiter.version>
 		<maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
 		<maven-failsafe-plugin.version>2.22.2</maven-failsafe-plugin.version>
-		<pulsar.version>2.7.1</pulsar.version>
+		<pulsar.version>2.8.4</pulsar.version>
 
 		<ciTz>Europe/Madrid</ciTz>
 		<ciPulsarImage>apachepulsar/pulsar:${pulsar.version}</ciPulsarImage>
@@ -54,6 +54,12 @@
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
 			<version>${junit-jupiter.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-all</artifactId>
+			<version>1.3</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
